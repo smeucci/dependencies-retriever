@@ -38,7 +38,7 @@ def process(repo_name, download=False, extract=False, create=False, process=Fals
         csv_creator.create_csvs(data["repo_path"], "projects")
 
     if process:
-        csv_processor.merge_csv_files(data["csv_output_path"], data["final_csv_output"], data["repo_name"])
+        csv_processor.merge_csv_files(data["csv_output_path"], data["final_csv_output"])
 
 
 def merge_only(folder_path, output_file):

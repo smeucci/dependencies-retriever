@@ -3,11 +3,15 @@ import os
 from collections import defaultdict
 
 
-def merge_csv_files(folder_path, output_file, keyword_to_exclude):
+keywords_to_exclude = ["movyon", "autostrade"]
+
+
+def merge_csv_files(folder_path, output_file):
 
     print(f"-- Merging all csv file from folder {folder_path} in file {output_file}")
 
-    libraries = defaultdict(lambda: defaultdict(set))  # defaultdict annidato per gestire 'type', 'library' e 'versions'
+    # defaultdict annidato per gestire 'type', 'library' e 'versions'
+    libraries = defaultdict(lambda: defaultdict(set))
 
     # Scansione dei file nella directory
     for filename in os.listdir(folder_path):
@@ -16,7 +20,7 @@ def merge_csv_files(folder_path, output_file, keyword_to_exclude):
                 reader = csv.DictReader(file)
                 for row in reader:
 
-                    if should_exclude(row["library"], keyword_to_exclude):
+                    if should_exclude(row["library"]):
                         continue
 
                     # Split delle versioni e aggiunta al set per evitare duplicati
@@ -40,5 +44,5 @@ def merge_csv_files(folder_path, output_file, keyword_to_exclude):
         writer.writerows(rows)  # Scrittura delle righe ordinate
 
 
-def should_exclude(library, keyword_to_exclude):
-    return library.find(keyword_to_exclude) != -1
+def should_exclude(library):
+    return any(keyword in library for keyword in keywords_to_exclude)
