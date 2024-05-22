@@ -25,7 +25,12 @@ def extract_pom_deps(path):
 
 def extract_package_json_deps(path):
 
-    print(f"-> Extracting package.json deps for {path}")
+    subdirectories = get_subdirectories(path)
+
+    for subdir in subdirectories:
+        print(f"-> Extracting package.json deps for {subdir}")
+        project = os.path.basename(subdir)
+        call_package_json_deps(subdir, project)
 
     return
 
@@ -33,15 +38,27 @@ def extract_package_json_deps(path):
 def get_subdirectories(root_folder):
     subdirs = []
     for dirpath, dirnames, filenames in os.walk(root_folder):
-        for dirname in dirnames:
-            subdir_path = os.path.join(dirpath, dirname)
-            subdirs.append(subdir_path)
+        if dirpath.find("node_modules") == -1 and dirpath.find("target") == -1:
+            for dirname in dirnames:
+                if dirname.find("node_modules") == -1 and dirname.find("target") == -1:
+                    subdir_path = os.path.join(dirpath, dirname)
+                    subdirs.append(subdir_path)
     return subdirs
 
 
 def call_mvn_deps(path, project):
 
-    command = ["sh", "utils/mvn_deps.sh", path, project]
+    command = ["sh", "utils/mvn_deps_and_licenses.sh", path, project]
+
+    try:
+        result = subprocess.run(command, check=True, text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    except subprocess.CalledProcessError as e:
+        print(f"Error: {e}")
+
+
+def call_package_json_deps(path, project):
+
+    command = ["sh", "utils/npm_install.sh", path, project]
 
     try:
         result = subprocess.run(command, check=True, text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)

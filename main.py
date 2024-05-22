@@ -38,23 +38,39 @@ def process(repo_name, download=False, extract=False, create=False, process=Fals
         csv_creator.create_csvs(data["repo_path"], "projects")
 
     if process:
-        csv_processor.merge_csv_files(data["csv_output_path"], data["final_csv_output"])
+        csv_processor.merge_csv_files(data["csv_output_path"], data["final_csv_output"], data["repo_name"])
+
+
+def merge_only(folder_path, output_file):
+    csv_processor.merge_csv_files(folder_path, output_file)
 
 
 def main():
     parser = argparse.ArgumentParser(description="Processa i repositories specificati.")
-    parser.add_argument("repo_name", type=str, help="Nome del repository da processare")
-    parser.add_argument("repo_type", type=str, help="Tipo di repository: gitlab, svn")
+    parser.add_argument("--repo-name", type=str, help="Nome del repository da processare")
+    parser.add_argument("--repo-type", type=str, help="Tipo di repository: gitlab, svn")
     parser.add_argument("--download", action="store_true", help="Scarica i dati")
     parser.add_argument("--extract", action="store_true", help="Estrai le dipendenze")
     parser.add_argument("--create", action="store_true", help="Crea i file CSV")
     parser.add_argument("--process", action="store_true", help="Elabora i file CSV")
     parser.add_argument("--all", action="store_true", help="Esegue tutti gli step: download, extract, create, process")
+    parser.add_argument("--merge-only", type=str, help="Specifica la cartella contenente i CSV da unire")
 
     args = parser.parse_args()
 
+    if args.merge_only:
+        output_file = os.path.join(args.merge_only, "merged_output.csv")
+        merge_only(args.merge_only, output_file)
+        return
+
     if args.all:
         args.download = args.extract = args.create = args.process = True
+
+    if not args.repo_name:
+        parser.error("the following arguments are required: --repo_name")
+
+    if not args.repo_type:
+        parser.error("the following arguments are required: --repo_type")
 
     start_time = time.time()
     start_timestamp = datetime.now()
