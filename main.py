@@ -1,6 +1,8 @@
 import os
 import json
 import argparse
+import time
+from datetime import datetime
 from lib import download_gitlab, extractor_deps, csv_creator, csv_processor
 
 script_dir = os.path.dirname(os.path.realpath(__file__))
@@ -54,10 +56,20 @@ def main():
     if args.all:
         args.download = args.extract = args.create = args.process = True
 
+    start_time = time.time()
+    start_timestamp = datetime.now()
+
     if args.repo_type == "gitlab":
         process(args.repo_name, args.download, args.extract, args.create, args.process)
     else:
         print(f"Nessun tipo repository corrispondente a: {args.repo_type}")
+
+    end_time = time.time()
+    end_timestamp = datetime.now()
+    duration = end_time - start_time
+
+    print(f"\nScript started at {start_timestamp.strftime('%Y-%m-%d %H:%M:%S')} and ended at {end_timestamp.strftime('%Y-%m-%d %H:%M:%S')}")
+    print(f"Total execution time: {duration/60:.2f} minutes")
 
 
 if __name__ == "__main__":
