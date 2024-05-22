@@ -1,0 +1,7 @@
+{
+    "repo": {
+        "gitlab_url": "https://tch-gitlab01.it/api/v4",
+        "token": "xxxxx",
+        "repo_name": "repo"
+    }
+}
