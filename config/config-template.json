@@ -1,7 +1,16 @@
 {
     "repo": {
-        "gitlab_url": "https://tch-gitlab01.it/api/v4",
+        "gitlab_url": "https://gitlab01.it/api/v4",
         "token": "xxxxx",
         "repo_name": "repo"
+    },
+    "svn": {
+        "svn_url": "http://svn.it/",
+        "username": "xxxx",
+        "password": "xxxxx",
+        "repos": [
+            "project1",
+            "project2"
+        ]
     }
 }

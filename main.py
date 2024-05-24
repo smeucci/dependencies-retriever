@@ -3,7 +3,7 @@ import json
 import argparse
 import time
 from datetime import datetime
-from lib import download_gitlab, extractor_deps, csv_creator, csv_processor
+from lib import download_gitlab, extractor_deps, csv_creator, csv_processor, download_svn
 
 script_dir = os.path.dirname(os.path.realpath(__file__))
 
@@ -14,7 +14,7 @@ def load_config(repo_name):
     return config.get(repo_name)
 
 
-def process(repo_name, download=False, extract=False, create=False, process=False):
+def process_gitlab(repo_name, download=False, extract=False, create=False, process=False):
     data = load_config(repo_name)
     if not data:
         print(f"No configuration found for {repo_name}")
@@ -30,6 +30,40 @@ def process(repo_name, download=False, extract=False, create=False, process=Fals
 
     if download:
         download_gitlab.download_all_from_gitlab(data, data["repo_name"])
+
+    if extract:
+        extractor_deps.extract_deps(data["projects_output_path"])
+
+    if create:
+        csv_creator.create_csvs(data["repo_path"], "projects")
+
+    if process:
+        csv_processor.merge_csv_files(data["csv_output_path"], data["final_csv_output"])
+
+
+def process_svns(repo_name, download=False, extract=False, create=False, process=False):
+
+    data = load_config(repo_name)
+    if not data:
+        print(f"No configuration found for {repo_name}")
+        return
+
+    for repo in data["repos"]:
+        process_svn(repo, data, download, extract, create, process)
+
+
+def process_svn(repo_name, data, download=False, extract=False, create=False, process=False):
+
+    # Full paths
+    data["repo_name"] = repo_name
+    data["output_path"] = "data/output"
+    data["projects_output_path"] = os.path.join(data["output_path"], data["repo_name"], "projects")
+    data["repo_path"] = os.path.join(data["output_path"], data["repo_name"])
+    data["csv_output_path"] = os.path.join(data["output_path"], data["repo_name"], "csvs")
+    data["final_csv_output"] = os.path.join(data["output_path"], data["repo_name"], f"{data['repo_name']}-libs.csv")
+
+    if download:
+        download_svn.download_all_from_svn(data, repo_name)
 
     if extract:
         extractor_deps.extract_deps(data["projects_output_path"])
@@ -76,7 +110,9 @@ def main():
     start_timestamp = datetime.now()
 
     if args.repo_type == "gitlab":
-        process(args.repo_name, args.download, args.extract, args.create, args.process)
+        process_gitlab(args.repo_name, args.download, args.extract, args.create, args.process)
+    elif args.repo_type == "svn":
+        process_svns(args.repo_name, args.download, args.extract, args.create, args.process)
     else:
         print(f"Nessun tipo repository corrispondente a: {args.repo_type}")
 
